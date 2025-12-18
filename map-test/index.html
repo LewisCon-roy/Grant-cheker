@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite App</title>
+    <script type="module" src="src/main.js"></script>
+  </head>
+  <body>
+    <arcgis-map basemap="hybrid" center="-1.4723906879851882,53.38049167764938" zoom="7">
+      <arcgis-sketch 
+        position="top-left" 
+        creation-mode="continuous" 
+        hide-settings-menu="True" 
+        hide-undo-redo-menu="True"
+        hide-create-tools-circle="True"
+        hide-selection-tools-lasso-selection="True"
+        hide-selection-tools-rectangle-selection="True"
+        hide-create-tools-point="True"
+        hide-create-tools-polyline="True">
+        </arcgis-sketch>
+        <arcgis-zoom
+        position="top-right"
+        state="disabled"
+        layout="vertical"
+      ></arcgis-zoom>
+    </arcgis-map>
+    <button id="Submit">Submit queries</button>
+
+</body>
+</html>
+
+

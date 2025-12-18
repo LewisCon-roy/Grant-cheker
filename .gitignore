@@ -205,4 +205,9 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
-./backend/data/*
+
+# ingnore the image files as there BIG
+backend/data/*
+
+# ignore DS file 
+.DS_Store
