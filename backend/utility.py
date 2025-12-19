@@ -1,29 +1,22 @@
 import numpy as np
 import shapely 
 from shapely import STRtree,Point,Polygon
-from pyproj import Geod,CRS
 import geocoding as gc 
 
 
-# create bounding box then ray trace each line and check checking if inside
-# unsure weather or not to use mapCord or imageCord or imgPixel
-# use imgCord as thats what we get from the transform 
-# TODO maybe change to map cord as may be more efficent
-
-GEOD = CRS("EPSG:27700").get_geod()
 # RETURNS : the pixels in shapes in LatLong Form 
+"""
+returns all pixels in a shape in lat long form 
+  params: 
+    latLongPoints - [[float,float]] - list of points correspondint to latitude and longitude if shape
+    tranformedPoints - [(int,int)] - list of points that correspond to image coordinates
+"""
 def getAllPixelsInShape(latLongPoints,transformedPoints):
-  # maybe swap these around
   cords = np.array(latLongPoints).T 
   coords = []
   for i in range(len(cords[0])):
     coords.append(tuple(cords[:,i]))
   coords = tuple(coords)
-  polygonLatLong = Polygon(shell=coords,holes=None)
-  polygonLatLong = normaliseShape(polygonLatLong)
-  area = abs(GEOD.geometry_area_perimeter(polygonLatLong)[0])
-  print("Area of the polygonLatLong: " , area)
-  
   # convert to other points to make bounding box 
   cords = np.array(transformedPoints).T
   x_cords = cords[0,:]
@@ -52,8 +45,8 @@ def getAllPixelsInShape(latLongPoints,transformedPoints):
     -- geometry the geometry of the shape
 """
 def normaliseShape(geometry):
-  LATITUDE_SCALE = 111.195 
-  LONGITUDE_SCALE = 71.474
+  LATITUDE_SCALE = 111195 
+  LONGITUDE_SCALE = 71474
   
   points = geometry.exterior.xy
   latitude = points[0]
@@ -69,3 +62,18 @@ def normaliseShape(geometry):
   points = list(zip(latitude,longitude))
     
   return Polygon(shell=points,holes=None)
+
+"""
+returns the area of a shape in meters
+"""
+def area(polygon):
+  return normaliseShape(polygon).area 
+
+"""
+returns the area of a shape in hectares
+"""
+def areaHectares(polygon):
+  return area(polygon)/10000
+
+def perimiter(polygon):
+  return normaliseShape(polygon).length  
