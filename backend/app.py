@@ -21,18 +21,26 @@ def recieveData():
   # clean json data
   # TODO map to the tiff data
   for shapePoints in JSONdata:
-    print(shapePoints)
     transformedPoints = gc.transformPointsRounded(gc.mapToImgTransfrom,shapePoints)
-    pointsInShape = gc.getPointsInShape(shapePoints,transformedPoints)
+    pointsInShape = gc.getPointsInShape(transformedPoints)
+    print(f"inshape {pointIn(pointsInShape)}")
     classifiedPoints = gc.classifyCords(pointsInShape)
+    print(f"inshape {pointIn(classifiedPoints)}")
     # add to testing 
+  
     reduced = classifiedPoints[:]
-    reduced = list(map(lambda x : x[:2],reduced))
-    reduced = np.array(list(map(lambda x : [x[0][0],x[0][1],x[1]],reduced)))
+    # reduced = list(map(lambda x : x[:3],reduced))
     if TESTING :
-      np.savetxt("../testing/TestData.txt",reduced)
+      np.savetxt("../testing/TestData.txt",reduced,fmt="%d")
     # print("reduced ",reduced)
   return "Good"
+ 
+ 
+# check if point in array 
+def pointIn(arr):
+  target = [343650,154200]
+  return arr[(arr[:, :2] == target).all(axis=1)]
+ 
  
 @app.route("/",methods=['POST'])
 def homePost():

@@ -72,8 +72,8 @@ def coordToPixel(affineTransform,point):
   # print("point: ", point)
   return np.matmul(np.linalg.inv(affineTransform),point)[:-1]
 
-def getPointsInShape(latLongPoints,transformedPoints):
-  return ut.getAllPixelsInShape(latLongPoints,transformedPoints)
+def getPointsInShape(transformedPoints):
+  return ut.getAllPixelsInShape(transformedPoints)
   
 # TODO make it work for multiple differnet images
 data = gdal.Open(r'./data/ukregion-southwestengland.tif')
@@ -103,7 +103,8 @@ def classifyCords(cordinates):
   n_cords = len(cordinates)
   for cord in cordinates:
     # changing into np arrays to do the matrix multpilcation for affine transform
-    cord2d = cord 
+    # unpack the list inorder to place it into arry 
+    cord2d = cord.tolist() 
     cord = np.reshape(np.append(np.array(cord),1),(3,1))
     # round the pixel 
     pixel = np.ndarray.astype(np.round(coordToPixel(affineTransform,cord),0),np.int32)    
@@ -115,7 +116,7 @@ def classifyCords(cordinates):
       groundTypes[land_type] = (confidence,1)
       # print(groundTypes)
     groundTypes[land_type] = (groundTypes[land_type][0] + confidence,groundTypes[land_type][1])  
-    pointsArr.append([cord2d,classification,confidence])
+    pointsArr.append([cord2d[0],cord2d[1],classification,confidence])
 
     # print("classification: " + str(classification), "confidence: " + str(confidence))
     
@@ -126,11 +127,11 @@ def classifyCords(cordinates):
   # Also go and get the total area taken up by this ground type
   # Total area and confidence of that area 
   # print(groundTypes)
-  return pointsArr
+  return np.array(pointsArr)
   
 
 # print("affine: " , (affineTransform))
-classifyCords([[343733,152979],[345655,153690]])
+# classifyCords([[343733,152979],[345655,153690]])
 # print(mapToImgTransfrom.TransformPoint(51.29475195421389, -2.774935635501995))
 # print(imgToMapTransform.TransformPoint(344113,154468))
 

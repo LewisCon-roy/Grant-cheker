@@ -46,6 +46,7 @@ submitButton.addEventListener('click',async (e)=>{
   for (let i = 0; i < lngLatArr.length; i++) {
   lngLatArr[i] = [...new Map(lngLatArr[i].map(c => [c.join(','), c])).values()];  
   }
+  // add point to end
   console.log("array" ,lngLatArr)
 
   // console.log(JSON.stringify(lngLatArr))

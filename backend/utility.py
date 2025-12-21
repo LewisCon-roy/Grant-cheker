@@ -1,6 +1,7 @@
 import numpy as np
 import shapely 
-from shapely import STRtree,Point,Polygon
+from shapely import STRtree,Point,Polygon,MultiPoint
+from shapely.ops import orient
 import geocoding as gc 
 
 
@@ -8,15 +9,9 @@ import geocoding as gc
 """
 returns all pixels in a shape in lat long form 
   params: 
-    latLongPoints - [[float,float]] - list of points correspondint to latitude and longitude if shape
     tranformedPoints - [(int,int)] - list of points that correspond to image coordinates
 """
-def getAllPixelsInShape(latLongPoints,transformedPoints):
-  cords = np.array(latLongPoints).T 
-  coords = []
-  for i in range(len(cords[0])):
-    coords.append(tuple(cords[:,i]))
-  coords = tuple(coords)
+def getAllPixelsInShape(transformedPoints):
   # convert to other points to make bounding box 
   cords = np.array(transformedPoints).T
   x_cords = cords[0,:]
@@ -24,17 +19,33 @@ def getAllPixelsInShape(latLongPoints,transformedPoints):
   x_min , x_max = min(x_cords),max(x_cords)
   y_min , y_max = min(y_cords),max(y_cords)
   
-  grid_Points= [(x,y) for x in range(x_min,x_max+1) for y in range(y_min,y_max+1)]
-  coords = []
-  for i in range(len(cords[0])):
-    coords.append(tuple(cords[:,i]))
-  coords = tuple(coords)
-  polygonTransformed = Polygon(shell=coords,holes=None)
+    
+  x_range = np.arange(x_min,x_max + 1)
+  y_range = np.arange(y_min,y_max + 1)
+  x,y = np.meshgrid(x_range,y_range)
   
-  pointsIn = list(map(lambda p: p if shapely.contains_xy(polygonTransformed,p[0],p[1]) else None,grid_Points))
-  pointsIn = [x for x in pointsIn if x is not None]
+  print(f"n_items = {x.shape[0] * x.shape[1]}")
   
-  return np.array(pointsIn)
+  x_flat = x.flatten() 
+  y_flat = y.flatten()
+  
+  coords = list(zip(x_cords,y_cords))  
+  # right now only works for convex shapes which i suppose is a good thing as most areas wont be concave
+  polygonTransformed = MultiPoint(coords).convex_hull
+  # TODO fix so takes all shapes 
+  polygonBuffered = polygonTransformed.buffer(5)
+  
+  mask = shapely.contains_xy(polygonBuffered,x_flat + 0.5,y_flat + 0.5)
+  
+  # print(f"points in = {np.count_nonzero(mask==True)}")
+  # print(f"points out = {np.count_nonzero(mask==False)}")
+  # print(f"percentage inside = {np.count_nonzero(mask==True)/(x.shape[0] * x.shape[1])}")
+  x_points = x_flat[mask]
+  y_points = y_flat[mask]
+  
+  pointsIn = np.vstack((x_points,y_points)).T
+  
+  return pointsIn
 
 
 """normalise a polygon so that it's area can be worked out
